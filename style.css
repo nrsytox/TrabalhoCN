@@ -1,0 +1,178 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f1f1f1;
+}
+
+* {
+  box-sizing: border-box;
+  border-radius: 12px;
+}
+
+a {
+  color: #26878c;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+footer {
+  font-size: 9px;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+}
+
+nav {
+  height: 70px;
+  text-align: center;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#entrar {
+  padding: 16px 24px;
+  border: 1px solid #26878c;
+  margin-right: 5px;
+}
+
+#entrar:hover,
+#inscrever:hover {
+  opacity: 1;
+}
+
+#inscrever {
+  padding: 16px 24px;
+  color: white;
+  background-color: #26878c;
+  border: 1px solid #26878c;
+  margin-left: 5px;
+}
+
+.info {
+  text-align: center;
+}
+
+#title {
+  text-align: center;
+}
+
+/* Full-width input fields */
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  display: inline-block;
+  border: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+hr {
+  border: 2px solid #8b8a8a;
+  margin-bottom: 25px;
+}
+
+button:hover {
+  opacity: 1;
+}
+
+/* Extra styles for the cancel button */
+.cancelbtn {
+  padding: 10px;
+  background-color: #f44336;
+  color: white;
+  padding: 14px 20px;
+  margin-right: 5px;
+  border: none;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.firstbtn {
+  padding: 10px;
+  background-color: #26878c;
+  color: white;
+  padding: 14px 20px;
+  margin-left: 5px;
+  border: none;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+/* Add padding to container elements */
+.container {
+  padding: 16px;
+}
+
+.clearfix {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Clear floats */
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+#registoLogin {
+  text-align: center;
+  font-size: smaller;
+}
+
+/* Change styles for cancel button and signup button on extra small screens */
+@media screen and (max-width: 300px) {
+  .cancelbtn,
+  .firstbtn {
+    width: 100%;
+  }
+}
+
+/* Float four columns side by side */
+.column {
+  float: left;
+  width: 33%;
+  padding: 10px;
+}
+
+/* Remove extra left and right margins, due to padding in columns */
+.row {
+  margin: 0 -5px;
+  
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Style the counter cards */
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* this adds the "card" effect */
+  padding: 16px;
+  text-align: center;
+  background-color: #f1f1f1;
+}
+
+/* Responsive columns - one column layout (vertical) on small screens */
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+    display: block;
+    margin-bottom: 20px;
+  }
+}

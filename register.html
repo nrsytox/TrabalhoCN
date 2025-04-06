@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseMate</title>
+    <link rel="icon" type="image/logo1" href="/images/logo1.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <form action="/auth/login" method="POST">
+        <div class="container">
+            <h1 id="title">REGISTO</h1>
+            <hr>
+
+            <label for="text"><b>Username</b></label>
+            <input type="text" placeholder="Enter a username" name="username" required>
+            <br>
+            <label for="email"><b>Email</b></label>
+            <input type="text" placeholder="Enter Email" name="email" required>
+            <br>
+            <label for="psw"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="psw" required>
+
+            <div class="clearfix">
+                <a id="back-link"><button type="button" class="cancelbtn">Voltar</button></a>
+                <button type="button" class="firstbtn">Registar</button>
+            </div>
+        </div>
+    </form>
+    <footer>
+        <p>Beatriz Marques | Filipe Serôdio | Tomás Ribeiro<br>
+            © 2025 ExpenseMate. All rights reserved.</p>
+    </footer>
+    <script>
+        document.getElementById('back-link').href = document.referrer || '/';
+    </script>
+</body>
+
+</html>
