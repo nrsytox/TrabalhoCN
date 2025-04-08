@@ -15,17 +15,17 @@
             <ul>
                 <div class="nav-container">
                     <div class="nav-left">
-                        <li><a href="adicionarFatura.html" class="normalbtn"><span>Transações</span></a></li>
+                        <li><a href="adicionarFatura.html" class="normalbtn"><span>Adicionar Fatura</span></a></li>
                         <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
                     </div>
                     <div class="nav-center">
                         <li><a href="dashboard.html"><img src="logo.png"></a></li>
                     </div>
                     <div class="nav-right">
-                        <li><a href="transacoes.html" class="normalbtn"><span>Perfil</span></a></li>
-                        <li><a href="index.html" class="normalbtn"><span>Logout</span></a></li>
+                        <li><a href="perfil.html" class="normalbtn"><span>Perfil</span></a></li>
+                        <li><a href=# id="logoutBtn"><span>Logout</span></a></li>
                     </div>
-                  </div>
+                </div>
             </ul>
         </nav>
         <div class="row">
@@ -85,6 +85,26 @@
         <p>Beatriz Marques | Filipe Serôdio | Tomás Ribeiro<br>
             © 2025 ExpenseMate. All rights reserved.</p>
     </footer>
+    <script>
+        // Verifica sessão
+        fetch("/api/perfil")
+            .then(res => {
+                if (res.status === 200) return res.json();
+                else window.location.href = "/";
+            })
+            .then(user => {
+                document.getElementById("userNome").textContent = user.nome;
+                document.getElementById("orcamento").textContent = user.orcamento_mensal;
+            });
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", () => {
+                    fetch("/logout").then(() => (window.location.href = "/"));
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

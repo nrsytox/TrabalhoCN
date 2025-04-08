@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - ExpenseMate</title>
+    <link rel="icon" type="image/logo1" href="logo1.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav>
+        <li><a href="dashboard.html"><span>Dashboard</span></a></li>
+        <li><a href=# id="logoutBtn"><span>Logout</span></a></li>
+
+    </nav>
+
+    <div class="container info">
+        <h2>Perfil do Utilizador</h2>
+        <p><strong>Nome:</strong> <span id="nome"></span></p>
+        <p><strong>Email:</strong> <span id="email"></span></p>
+        <p><strong>Orçamento Mensal:</strong> <span id="orcamento_mensal"></span>€</p>
+        <p><strong>Orçamento Restante:</strong> <span id="orcamento_restante"></span>€</p>
+    </div>
+
+
+    <footer>
+        <p>Beatriz Marques | Filipe Serôdio | Tomás Ribeiro<br>
+            © 2025 ExpenseMate. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Preencher os dados do utilizador
+        fetch("/api/perfil")
+            .then(res => {
+                if (res.status === 200) return res.json();
+                else window.location.href = "/";
+            })
+            .then(user => {
+                document.getElementById("nome").textContent = user.nome;
+                document.getElementById("email").textContent = user.email;
+                document.getElementById("orcamento_mensal").textContent = user.orcamento_mensal;
+                document.getElementById("orcamento_restante").textContent = user.orcamento_restante;
+            });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", () => {
+                    fetch("/logout").then(() => (window.location.href = "/"));
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
