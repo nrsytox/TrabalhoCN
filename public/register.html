@@ -10,23 +10,26 @@
 </head>
 
 <body>
-    <form action="/auth/login" method="POST">
+    <form action="/auth/register" method="POST">
         <div class="container">
             <h1 id="title">REGISTO</h1>
             <hr>
 
-            <label for="text"><b>Username</b></label>
-            <input type="text" placeholder="Enter a username" name="username" required>
+            <label for="text"><b>Nome</b></label>
+            <input type="text" placeholder="Introduza o seu nome" name="nome" required>
             <br>
             <label for="email"><b>Email</b></label>
-            <input type="text" placeholder="Enter Email" name="email" required>
+            <input type="text" placeholder="Introduza o seu email" name="email" required>
             <br>
-            <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="psw" required>
-
+            <label for="password"><b>Password</b></label>
+            <input type="password" placeholder="Introduza a sua password" name="password" required>
+            <br>
+            <label for="orcamento_mensal"><b>Orçamento Mensal</b></label>
+            <input type="number" placeholder="Introduza o seu orçamento mensal" name="orcamento_mensal" required>
+            
             <div class="clearfix">
                 <a id="back-link"><button type="button" class="cancelbtn">Voltar</button></a>
-                <button type="button" class="firstbtn">Registar</button>
+                <button type="submit" class="firstbtn">Registar</button>
             </div>
         </div>
     </form>

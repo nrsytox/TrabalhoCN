@@ -10,6 +10,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+
 
 // CosmosDB
 const endpoint = process.env.COSMOS_ENDPOINT;
@@ -22,36 +24,38 @@ const container = client.database(databaseId).container(containerId);
 
 // Registar
 app.post("/auth/register", async (req, res) => {
-  const { username, email, psw } = req.body;
+  const { nome, email, password, orcamento_mensal } = req.body;
 
-  const { resources } = await container.items
+  const { resources: existingUsers } = await container.items
     .query({
       query: "SELECT * FROM c WHERE c.email = @email",
       parameters: [{ name: "@email", value: email }]
     })
     .fetchAll();
 
-  if (resources.length > 0) {
+  if (existingUsers.length > 0) {
     return res.status(400).json({ message: "Email já registado" });
   }
 
-  const hashedPassword = await bcrypt.hash(psw, 10);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   const newUser = {
     id: uuidv4(),
-    username,
+    nome,
     email,
-    password: hashedPassword
-  };
+    password: hashedPassword,
+    orcamento_mensal: Number(orcamento_mensal),
+    orcamento_restante: Number(orcamento_mensal),
+    grupos: []
+    };
 
   await container.items.create(newUser);
-
   res.status(201).json({ message: "Registo feito com sucesso!" });
 });
 
 // Login
 app.post("/auth/login", async (req, res) => {
-  const { email, psw } = req.body;
+  const { email, password } = req.body;
 
   const { resources } = await container.items
     .query({
@@ -65,18 +69,18 @@ app.post("/auth/login", async (req, res) => {
   }
 
   const user = resources[0];
-  const valid = await bcrypt.compare(psw, user.password);
+  const valid = await bcrypt.compare(password, user.password);
 
   if (!valid) {
     return res.status(401).json({ message: "Password incorreta" });
   }
 
-  res.status(200).json({
+  res.status(201).json({
     message: "Login com sucesso",
     user: {
       id: user.id,
-      username: user.username,
-      email: user.email
+      nome: user.nome,
+      email: user.email,
     }
   });
 });
