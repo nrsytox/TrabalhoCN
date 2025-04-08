@@ -50,7 +50,7 @@ app.post("/auth/register", async (req, res) => {
     };
 
   await container.items.create(newUser);
-  res.status(201).json({ message: "Registo feito com sucesso!" });
+  res.redirect(303, '/dashboard');
 });
 
 // Login
@@ -75,14 +75,12 @@ app.post("/auth/login", async (req, res) => {
     return res.status(401).json({ message: "Password incorreta" });
   }
 
-  res.status(201).json({
-    message: "Login com sucesso",
-    user: {
-      id: user.id,
-      nome: user.nome,
-      email: user.email,
-    }
-  });
+  res.redirect(303, '/dashboard');
+});
+
+// Página do Dashboard
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 // Página inicial
