@@ -252,3 +252,25 @@ nav a img {
   justify-content: center;
   flex: 0;
 }
+.btn-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.add-btn {
+  display: inline-block;
+  padding: 14px 24px;
+  background-color: #26878c;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 16px;
+  opacity: 0.9;
+  transition: 0.3s;
+}
+
+.add-btn:hover {
+  opacity: 1;
+  background-color: #1e6f72;
+}

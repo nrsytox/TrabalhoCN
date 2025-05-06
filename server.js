@@ -134,6 +134,50 @@ app.post("/auth/login", async (req, res) => {
   res.redirect("/dashboard");
 });
 
+// Endpoint para categorias
+app.get("/api/categorias", async (req, res) => {
+  const categoriaContainer = client.database("gestao_despesas").container("categorias");
+  const { resources } = await categoriaContainer.items.query("SELECT * FROM c").fetchAll();
+  res.json(resources);
+});
+
+// Endpoint para grupos do utilizador logado
+app.get("/api/grupos", async (req, res) => {
+  const userId = req.session?.user?.id;
+  if (!userId) return res.status(401).json({ error: "Não autenticado" });
+
+  const grupoContainer = client.database("gestao_despesas").container("grupos");
+  const { resources } = await grupoContainer.items
+    .query({
+      query: "SELECT * FROM c WHERE ARRAY_CONTAINS(c.membros, @id)",
+      parameters: [{ name: "@id", value: userId }]
+    }).fetchAll();
+
+  res.json(resources);
+});
+
+// Endpoint para adicionar despesa
+app.post("/api/despesas", async (req, res) => {
+  const userId = req.session?.user?.id;
+  if (!userId) return res.status(401).json({ error: "Não autenticado" });
+
+  const { descricao, valor, categoria, grupo } = req.body;
+  const despesaContainer = client.database("gestao_despesas").container("transacoes");
+
+  const novaDespesa = {
+    id: uuidv4(),
+    descricao,
+    valor: Number(valor),
+    categoria,
+    grupo: grupo || null,
+    utilizador: userId,
+    data: new Date().toISOString()
+  };
+
+  await despesaContainer.items.create(novaDespesa);
+  res.status(201).json({ mensagem: "Despesa adicionada com sucesso" });
+});
+
 // Logout
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {

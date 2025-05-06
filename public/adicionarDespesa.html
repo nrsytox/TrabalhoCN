@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Adicionar Despesa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <nav>
+    <a href="dashboard.html"><span>Voltar</span></a>
+    <a href="dashboard.html"><img src="logo1.png" height="70px" width="70px"></a>
+    <a href="index.html"><span>Logout</span></a>
+  </nav>
+
+  <div class="container">
+    <h2 id="title">Nova Despesa</h2>
+    <form id="formDespesa">
+      <label for="descricao">Descrição:</label><br>
+      <input type="text" id="descricao" name="descricao" required><br><br>
+
+      <label for="valor">Valor (€):</label><br>
+      <input type="number" id="valor" name="valor" step="0.01" required><br><br>
+
+      <label for="categorias">Categoria:</label><br>
+      <select id="categorias" name="categorias" required></select><br><br>
+
+      <label for="grupos">Grupo (opcional):</label><br>
+      <select id="grupos" name="grupos">
+        <option value="">Sem grupo</option>
+      </select><br><br>
+
+      <button type="submit" class="firstbtn">Adicionar</button>
+    </form>
+  </div>
+
+  <script>
+    async function carregarCategorias() {
+      const res = await fetch('/api/categorias');
+      const categorias = await res.json();
+      const select = document.getElementById('categorias');
+      categorias.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c.id;
+        option.textContent = c.nome;
+        select.appendChild(option);
+      });
+    }
+
+    async function carregarGrupos() {
+      const res = await fetch('/api/grupos');
+      const grupos = await res.json();
+      const select = document.getElementById('grupos');
+      grupos.forEach(g => {
+        const option = document.createElement('option');
+        option.value = g.id;
+        option.textContent = g.nome;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById("formDespesa").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const despesa = {
+        descricao: document.getElementById('descricao').value,
+        valor: parseFloat(document.getElementById('valor').value),
+        categoria: document.getElementById('categorias').value,
+        grupo: document.getElementById('grupos').value || null
+      };
+
+
+      const res = await fetch("/api/despesas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(despesa)
+      });
+
+      if (res.ok) {
+        alert("Despesa adicionada com sucesso!");
+        window.location.href = "dashboard.html";
+      } else {
+        alert("Erro ao adicionar despesa.");
+      }
+    });
+
+    carregarCategorias();
+    carregarGrupos();
+  </script>
+</body>
+
+</html>
