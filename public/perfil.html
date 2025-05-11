@@ -10,18 +10,30 @@
 </head>
 
 <body>
-    <nav>
-        <li><a href="dashboard.html"><span>Dashboard</span></a></li>
-        <li><a href=# id="logoutBtn"><span>Logout</span></a></li>
-
+    <nav>           
+        <ul>
+            <div class="nav-container">
+                <div class="nav-left">
+                    <li><a href="faturas.html" class="normalbtn"><span>Faturas</span></a></li>
+                    <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
+                </div>
+                <div class="nav-center">
+                    <li><a href="dashboard.html"><img src="logo.png"></a></li>
+                </div>
+                <div class="nav-right">
+                    <li><a href="perfil.html" class="normalbtn"><span>Perfil</span></a></li>
+                    <li><a href=# id="logoutBtn" class="normalbtn"><span>Logout</span></a></li>
+                </div>
+            </div>
+        </ul>
     </nav>
 
     <div class="container info">
         <h2>Perfil do Utilizador</h2>
-        <p><strong>Nome:</strong> <span id="nome"></span></p>
-        <p><strong>Email:</strong> <span id="email"></span></p>
-        <p><strong>Orçamento Mensal:</strong> <span id="orcamento_mensal"></span>€</p>
-        <p><strong>Orçamento Restante:</strong> <span id="orcamento_restante"></span>€</p>
+        <label for="text"><b>Nome - </b></label><span id="nome"></span></p>
+        <label for="email"><b>Email - </b></label><span id="email"></span></p>
+        <label for="orcamento_mensal"><b>Orçamento Mensal - </b></label><span id="orcamento_mensal"></span>€</p>
+        <label for="orcamento_restante"><b>Orçamento Restante - </b></label><span id="orcamento_restante"></span>€</p>
     </div>
 
 

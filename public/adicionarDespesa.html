@@ -8,10 +8,22 @@
 </head>
 
 <body>
-  <nav>
-    <a href="dashboard.html"><span>Voltar</span></a>
-    <a href="dashboard.html"><img src="logo1.png" height="70px" width="70px"></a>
-    <a href="index.html"><span>Logout</span></a>
+  <nav>           
+    <ul>
+        <div class="nav-container">
+            <div class="nav-left">
+                <li><a href="faturas.html" class="normalbtn"><span>Faturas</span></a></li>
+                <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
+            </div>
+            <div class="nav-center">
+                <li><a href="dashboard.html"><img src="logo.png"></a></li>
+            </div>
+            <div class="nav-right">
+                <li><a href="perfil.html" class="normalbtn"><span>Perfil</span></a></li>
+                <li><a href=# id="logoutBtn" class="normalbtn"><span>Logout</span></a></li>
+            </div>
+        </div>
+    </ul>
   </nav>
 
   <div class="container">
@@ -31,7 +43,10 @@
         <option value="">Sem grupo</option>
       </select><br><br>
 
-      <button type="submit" class="firstbtn">Adicionar</button>
+      <div class="clearfix">
+        <a id="back-link"><button type="button" class="cancelbtn">Voltar</button></a>
+        <button type="submit" class="firstbtn">Adicionar</button>
+      </div>
     </form>
   </div>
 
@@ -87,6 +102,8 @@
 
     carregarCategorias();
     carregarGrupos();
+
+    document.getElementById('back-link').href = document.referrer || '/';
   </script>
 </body>
 

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Adicionar Despesa</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <div class="nav-container">
+                <div class="nav-left">
+                    <li><a href="faturas.html" class="normalbtn"><span>Faturas</span></a></li>
+                    <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
+                </div>
+                <div class="nav-center">
+                    <li><a href="dashboard.html"><img src="logo.png"></a></li>
+                </div>
+                <div class="nav-right">
+                    <li><a href="perfil.html" class="normalbtn"><span>Perfil</span></a></li>
+                    <li><a href=# id="logoutBtn" class="normalbtn"><span>Logout</span></a></li>
+                </div>
+            </div>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2 id="title">Novo Grupo</h2>
+        <form id="formDespesa">
+            <label for="Nome">Nome do Grupo</label><br>
+            <input type="text" id="nome_grupo" name="nome_grupo" required><br><br>
+
+            <label for="valor">Pessoas</label><br>
+            <div class="clearfix">
+                <input type="text" id="nomeInput" placeholder="Adicione uma pessoa">
+                <a onclick="adicionarNome()" class="normalbtn">Adicionar</a>
+            </div>
+
+            <ul id="listaNomes"></ul>
+
+            <div class="clearfix">
+                <a id="back-link"><button type="button" class="cancelbtn">Voltar</button></a>
+                <button type="submit" class="firstbtn">Criar Grupo</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function adicionarNome() {
+            const input = document.getElementById("nomeInput");
+            const nome = input.value.trim();
+
+            if (nome !== "") {
+                const li = document.createElement("li");
+                li.textContent = nome;
+                li.style.listStyleType = "none";
+                document.getElementById("listaNomes").appendChild(li);
+                input.value = "";
+                input.focus();
+            }
+        }
+
+        document.getElementById('back-link').href = document.referrer || '/';
+    </script>
+</body>
+
+</html>
