@@ -1,21 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenseMate</title>
+    <title>ExpenseMate - Dashboard</title>
     <link rel="icon" type="image/logo1" href="logo1.png">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .notification-card {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-card.urgent {
+            border-left-color: #f44336;
+            background-color: #ffebee;
+        }
+
+        .transaction-card {
+            background-color: white;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #4caf50;
+        }
+
+        .transaction-group {
+            border-left-color: #2196f3;
+        }
+
+        .section-title {
+            margin: 20px 0 10px;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .notification-date,
+        .transaction-date {
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .notification-message {
+            font-weight: 500;
+        }
+
+        .transaction-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .transaction-category {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
-        <nav>           
+        <nav>
+            <div class="btn-container">
+                <a href="adicionarDespesa.html" class="add-btn">Adicionar Despesa</a>
+            </div>
             <ul>
                 <div class="nav-container">
                     <div class="nav-left">
-                        <li><a href="faturas.html" class="normalbtn"><span>Faturas</span></a></li>
+                        <li><a href="adicionarFatura.html" class="normalbtn"><span>Adicionar Fatura</span></a></li>
                         <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
                     </div>
                     <div class="nav-center">
@@ -23,90 +81,210 @@
                     </div>
                     <div class="nav-right">
                         <li><a href="perfil.html" class="normalbtn"><span>Perfil</span></a></li>
-                        <li><a href=# id="logoutBtn" class="normalbtn"><span>Logout</span></a></li>
+                        <li><a href="#" id="logoutBtn"><span>Logout</span></a></li>
                     </div>
                 </div>
             </ul>
         </nav>
+
         <div class="row">
             <hr>
-            <div class="btn-container">
-                <a href="adicionarDespesa.html" class="add-btn">Adicionar Despesa</a>
-            </div>   
+
+            <!-- Seção de Notificações -->
             <div class="column">
-                <a href="">
-                    <div class="card">
-                        <h3>Despesa 1</h3>
-                        <p>Data: __/__/____</p>
-                        <p>Valor: ________</p>
-                    </div>
-                </a>
+                <h3 class="section-title">Notificações Recentes</h3>
+                <div id="notifications-container">
+                    <!-- As notificações serão carregadas aqui via JavaScript -->
+                </div>
             </div>
 
+            <!-- Seção de Transações Recentes -->
             <div class="column">
-                <a href="">
-                    <div class="card">
-                        <h3>Despesa 1</h3>
-                        <p>Data: __/__/____</p>
-                        <p>Valor: ________</p>
-                    </div>
-                </a>
+                <h3 class="section-title">Últimas Transações</h3>
+                <div id="transactions-container">
+                    <!-- As transações serão carregadas aqui via JavaScript -->
+                </div>
             </div>
 
+            <!-- Resumo do Orçamento -->
             <div class="column">
-                <a href="">
-                    <div class="card">
-                        <h3>Despesa 1</h3>
-                        <p>Data: __/__/____</p>
-                        <p>Valor: ________</p>
+                <h3 class="section-title">Seu Orçamento</h3>
+                <div class="card">
+                    <h4>Total Mensal: <span id="total-budget">€0</span></h4>
+                    <h4>Restante: <span id="remaining-budget">€0</span></h4>
+                    <div class="progress-bar-container">
+                        <div id="budget-progress" class="progress-bar"></div>
                     </div>
-                </a>
-            </div>
-
-            <div class="column">
-                <a href="">
-                    <div class="card">
-                        <h3>Despesa 1</h3>
-                        <p>Data: __/__/____</p>
-                        <p>Valor: ________</p>
-                    </div>
-                </a>
-            </div>
-
-            <div class="column">
-                <a href="">
-                    <div class="card">
-                        <h3>Despesa 1</h3>
-                        <p>Data: __/__/____</p>
-                        <p>Valor: ________</p>
-                    </div>
-                </a>
+                    <p id="budget-percentage">0% utilizado</p>
+                </div>
             </div>
         </div>
     </div>
+
     <footer>
         <p>Beatriz Marques | Filipe Serôdio | Tomás Ribeiro<br>
             © 2025 ExpenseMate. All rights reserved.</p>
     </footer>
+
     <script>
-        // Verifica sessão
-        fetch("/api/perfil")
-            .then(res => {
-                if (res.status === 200) return res.json();
-                else window.location.href = "/";
-            })
-            .then(user => {
-                document.getElementById("userNome").textContent = user.nome;
-                document.getElementById("orcamento").textContent = user.orcamento_mensal;
-            });
-        document.addEventListener("DOMContentLoaded", () => {
-            const logoutBtn = document.getElementById("logoutBtn");
-            if (logoutBtn) {
-                logoutBtn.addEventListener("click", () => {
-                    fetch("/logout").then(() => (window.location.href = "/"));
-                });
+        // Variável para armazenar o ID do usuário
+        let userId;
+
+        // Carregar dados do usuário e conteúdo
+        async function loadDashboardData() {
+            try {
+                // Verificar sessão e obter dados do usuário
+                const userResponse = await fetch("/api/perfil");
+                if (userResponse.status === 401) {
+                    window.location.href = "/";
+                    return;
+                }
+
+                const user = await userResponse.json();
+                userId = user.id;
+
+                // Atualizar informações do orçamento
+                document.getElementById("total-budget").textContent = `€${user.orcamento_mensal.toFixed(2)}`;
+                document.getElementById("remaining-budget").textContent = `€${user.orcamento_restante.toFixed(2)}`;
+
+                const percentUsed = ((user.orcamento_mensal - user.orcamento_restante) / user.orcamento_mensal) * 100;
+                document.getElementById("budget-percentage").textContent = `${percentUsed.toFixed(1)}% utilizado`;
+
+                const progressBar = document.getElementById("budget-progress");
+                progressBar.style.width = `${Math.min(percentUsed, 100)}%`;
+
+                if (percentUsed >= 80) {
+                    progressBar.style.backgroundColor = percentUsed >= 100 ? "#f44336" : "#ff9800";
+                }
+
+                // Carregar notificações
+                await loadNotifications();
+
+                // Carregar transações
+                await loadTransactions();
+
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
             }
+        }
+
+        // Carregar notificações
+        async function loadNotifications() {
+            try {
+                const response = await fetch("/api/notificacoes");
+                const { notificacoes } = await response.json();
+
+                const container = document.getElementById("notifications-container");
+                container.innerHTML = "";
+
+                if (notificacoes.length === 0) {
+                    container.innerHTML = "<p>Nenhuma notificação recente</p>";
+                    return;
+                }
+
+                // Ordenar por data (mais recente primeiro)
+                notificacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+                // Mostrar apenas as 5 mais recentes
+                notificacoes.slice(0, 5).forEach(not => {
+                    const notDiv = document.createElement("div");
+                    notDiv.className = `notification-card ${not.tipo === 'urgente' ? 'urgent' : ''}`;
+                    notDiv.innerHTML = `
+                        <div class="notification-message">${not.mensagem}</div>
+                        <div class="notification-date">${new Date(not.data).toLocaleDateString('pt-PT')}</div>
+                    `;
+                    container.appendChild(notDiv);
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar notificações:", error);
+            }
+        }
+
+        // Carregar transações
+        async function loadTransactions() {
+            try {
+                // Buscar transações
+                const transacoesResponse = await fetch(`/api/transacoes?userId=${userId}&limit=5`);
+                const transacoes = await transacoesResponse.json();
+
+                // Buscar categorias
+                const categoriasResponse = await fetch("/api/categorias");
+                const categorias = await categoriasResponse.json();
+
+                // Buscar grupos (se houver transações de grupo)
+                const hasGroupTransactions = transacoes.some(t => t.grupoId);
+                let gruposMap = {};
+
+                if (hasGroupTransactions) {
+                    const gruposResponse = await fetch("/api/grupos");
+                    const grupos = await gruposResponse.json();
+                    grupos.forEach(grupo => {
+                        gruposMap[grupo.id] = grupo.nome;
+                    });
+                }
+
+                // Criar mapa de categorias
+                const categoriasMap = {};
+                categorias.forEach(cat => {
+                    categoriasMap[cat.id] = {
+                        nome: cat.nome,
+                        cor: cat.cor
+                    };
+                });
+
+                const container = document.getElementById("transactions-container");
+                container.innerHTML = "";
+
+                if (transacoes.length === 0) {
+                    container.innerHTML = "<p>Nenhuma transação recente</p>";
+                    return;
+                }
+
+                // Ordenar por data (mais recente primeiro)
+                transacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+                transacoes.forEach(trans => {
+                    const categoria = categoriasMap[trans.categoriaId] || {
+                        nome: "Desconhecida",
+                        cor: "#666666"
+                    };
+
+                    const grupoNome = trans.grupoId ? gruposMap[trans.grupoId] : null;
+
+                    const transDiv = document.createElement("div");
+                    transDiv.className = `transaction-card ${trans.grupoId ? 'transaction-group' : ''}`;
+                    transDiv.innerHTML = `
+                <h4>${trans.descricao}</h4>
+                ${grupoNome ? `<div class="transaction-group-name">Grupo: ${grupoNome}</div>` : ''}
+                <div class="transaction-value">€${trans.valor.toFixed(2)}</div>
+                <div class="transaction-category" style="color: ${categoria.cor}">
+                    ${categoria.nome}
+                </div>
+                <div class="transaction-date">${new Date(trans.data).toLocaleDateString('pt-PT')}</div>
+            `;
+                    container.appendChild(transDiv);
+                });
+
+            } catch (error) {
+                console.error("Erro ao carregar transações:", error);
+                document.getElementById("transactions-container").innerHTML =
+                    "<p>Erro ao carregar transações</p>";
+            }
+        }
+
+        // Logout
+        document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+            e.preventDefault();
+            await fetch("/logout");
+            window.location.href = "/";
         });
+
+        // Carregar dados quando a página é aberta
+        document.addEventListener("DOMContentLoaded", loadDashboardData);
+
+        // Atualizar a cada 30 segundos
+        setInterval(loadDashboardData, 30000);
     </script>
 </body>
 

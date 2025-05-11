@@ -5,9 +5,47 @@
   <meta charset="UTF-8">
   <title>Adicionar Despesa</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .error-message {
+      color: #d32f2f;
+      background-color: #fde8e8;
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .loading {
+      position: relative;
+      pointer-events: none;
+    }
+    
+    .loading::after {
+      content: "";
+      position: absolute;
+      right: -25px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: translateY(-50%) rotate(360deg); }
+    }
+    
+    select:disabled {
+      background-color: #f3f3f3;
+    }
+  </style>
 </head>
 
 <body>
+  <!-- Seu nav permanece o mesmo -->
   <nav>           
     <ul>
         <div class="nav-container">
@@ -33,77 +71,198 @@
       <input type="text" id="descricao" name="descricao" required><br><br>
 
       <label for="valor">Valor (€):</label><br>
-      <input type="number" id="valor" name="valor" step="0.01" required><br><br>
+      <input type="number" id="valor" name="valor" step="0.01" min="0.01" required><br><br>
 
       <label for="categorias">Categoria:</label><br>
-      <select id="categorias" name="categorias" required></select><br><br>
+      <select id="categorias" name="categorias" required>
+        <option value="">Carregando categorias...</option>
+      </select><br><br>
 
       <label for="grupos">Grupo (opcional):</label><br>
       <select id="grupos" name="grupos">
-        <option value="">Sem grupo</option>
+        <option value="">Carregando grupos...</option>
       </select><br><br>
 
       <div class="clearfix">
         <a id="back-link"><button type="button" class="cancelbtn">Voltar</button></a>
-        <button type="submit" class="firstbtn">Adicionar</button>
+        <button type="submit" class="firstbtn" id="submitBtn">Adicionar</button>
       </div>
     </form>
   </div>
 
   <script>
-    async function carregarCategorias() {
-      const res = await fetch('/api/categorias');
-      const categorias = await res.json();
-      const select = document.getElementById('categorias');
-      categorias.forEach(c => {
+    // Função para carregar dados com tratamento robusto
+    async function loadData(url, selectId, isRequired = true) {
+      const select = document.getElementById(selectId);
+      
+      try {
+        const res = await fetch(url);
+        
+        if (!res.ok) {
+          throw new Error(`Erro HTTP: ${res.status}`);
+        }
+
+        const data = await res.json();
+        
+        // Verificação rigorosa dos dados
+        if (!data || !Array.isArray(data)) {
+          throw new Error('Dados recebidos não são um array válido');
+        }
+
+        // Limpar opções existentes
+        select.innerHTML = '';
+        
+        if (isRequired && data.length === 0) {
+          const option = document.createElement('option');
+          option.value = '';
+          option.textContent = 'Nenhum dado disponível';
+          select.appendChild(option);
+          select.disabled = true;
+          return false;
+        }
+
+        if (!isRequired) {
+          // Adicionar opção padrão para campos não obrigatórios
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = 'Selecione...';
+          select.appendChild(defaultOption);
+        }
+
+        // Processar cada item com verificação
+        data.forEach(item => {
+          if (item && item.id && item.nome) {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.nome;
+            select.appendChild(option);
+          }
+        });
+
+        return true;
+        
+      } catch (error) {
+        console.error(`Erro ao carregar ${selectId}:`, error);
+        
+        select.innerHTML = '';
         const option = document.createElement('option');
-        option.value = c.id;
-        option.textContent = c.nome;
+        option.value = '';
+        option.textContent = `Erro ao carregar ${selectId === 'categorias' ? 'categorias' : 'grupos'}`;
         select.appendChild(option);
-      });
+        select.disabled = isRequired;
+        
+        return false;
+      }
     }
 
-    async function carregarGrupos() {
-      const res = await fetch('/api/grupos');
-      const grupos = await res.json();
-      const select = document.getElementById('grupos');
-      grupos.forEach(g => {
-        const option = document.createElement('option');
-        option.value = g.id;
-        option.textContent = g.nome;
-        select.appendChild(option);
-      });
+    // Configuração inicial da página
+    async function initializePage() {
+      // Carregar categorias e grupos em paralelo
+      const [categoriesLoaded, groupsLoaded] = await Promise.all([
+        loadData('/api/categorias', 'categorias', true),
+        loadData('/api/grupos', 'grupos', false)
+      ]);
+
+      // Habilitar o botão de submit apenas se as categorias foram carregadas
+      document.getElementById('submitBtn').disabled = !categoriesLoaded;
+      
+      // Configurar botão de voltar
+      const backLink = document.getElementById('back-link');
+      backLink.href = document.referrer || 'dashboard.html';
+      backLink.onclick = (e) => {
+        if (!document.referrer) {
+          e.preventDefault();
+          window.location.href = 'dashboard.html';
+        }
+      };
     }
 
+    // Manipulador do formulário
     document.getElementById("formDespesa").addEventListener("submit", async function (e) {
       e.preventDefault();
+      
+      const form = e.target;
+      const submitBtn = document.getElementById('submitBtn');
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      
+      // Limpar erros anteriores
+      const existingError = form.querySelector('.error-message');
+      if (existingError) existingError.remove();
+      
+      // Validação dos campos
+      const descricao = document.getElementById('descricao').value.trim();
+      const valorInput = document.getElementById('valor');
+      const valor = parseFloat(valorInput.value);
+      const categoria = document.getElementById('categorias').value;
+      
+      if (!descricao) {
+        showError('Por favor, insira uma descrição.');
+        return;
+      }
+      
+      if (isNaN(valor)) {
+        showError('Por favor, insira um valor numérico válido.');
+        valorInput.focus();
+        return;
+      }
+      
+      if (valor <= 0) {
+        showError('O valor deve ser maior que zero.');
+        valorInput.focus();
+        return;
+      }
+      
+      if (!categoria) {
+        showError('Por favor, selecione uma categoria válida.');
+        return;
+      }
 
-      const despesa = {
-        descricao: document.getElementById('descricao').value,
-        valor: parseFloat(document.getElementById('valor').value),
-        categoria: document.getElementById('categorias').value,
-        grupo: document.getElementById('grupos').value || null
-      };
+      // Configurar estado de loading
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      submitBtn.textContent = 'A processar...';
+      
+      try {
+        const despesa = {
+          descricao: descricao,
+          valor: valor,
+          categoria: categoria,
+          grupo: document.getElementById('grupos').value || null
+        };
 
+        const res = await fetch("/api/despesas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(despesa)
+        });
 
-      const res = await fetch("/api/despesas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(despesa)
-      });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || 'Erro ao adicionar despesa');
+        }
 
-      if (res.ok) {
         alert("Despesa adicionada com sucesso!");
         window.location.href = "dashboard.html";
-      } else {
-        alert("Erro ao adicionar despesa.");
+        
+      } catch (error) {
+        console.error("Erro ao adicionar despesa:", error);
+        showError(error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.textContent = 'Adicionar';
+      }
+
+      function showError(message) {
+        errorDiv.textContent = message;
+        form.insertBefore(errorDiv, form.querySelector('.clearfix'));
       }
     });
 
-    carregarCategorias();
-    carregarGrupos();
-
-    document.getElementById('back-link').href = document.referrer || '/';
+    // Inicializar a página quando o DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', initializePage);
   </script>
 </body>
 
