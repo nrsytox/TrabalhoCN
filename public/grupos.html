@@ -28,38 +28,54 @@
                 </div>
             </ul>
         </nav>
+        <hr>
+        <div class="btn-container">
+            <a href="criarGrupo.html" class="add-btn">Criar Grupo</a>
+        </div>
         <div class="row">
-            <hr>
-            <div class="btn-container">
-                <a href="criarGrupo.html" class="add-btn">Criar Grupo</a>
-            </div>
-            <div class="column">
-                <a href="">
-                    <div class="card">
-                        <h3>Grupo 1</h3>
-                        <p>Pessoa 1</p>
-                        <p>Pessoa 2</p>
-                        <p>Pessoa 3</p>
-                    </div>
-                </a>
-            </div>
 
-            <div class="column">
-                <a href="">
-                    <div class="card">
-                        <h3>Grupo 2</h3>
-                        <p>Pessoa 1</p>
-                        <p>Pessoa 2</p>
-                        <p>Pessoa 3</p>
-                    </div>
-                </a>
-            </div>
         </div>
     </div>
     <footer>
         <p>Beatriz Marques | Filipe Serôdio | Tomás Ribeiro<br>
             © 2025 ExpenseMate. All rights reserved.</p>
     </footer>
+    <script>
+
+        async function loadGroups() {
+            try {
+                const response = await fetch("/api/grupos");
+                const groups = await response.json();
+
+                const container = document.querySelector(".row");
+                container.innerHTML = "";
+
+                if (groups.length === 0) {
+                    container.innerHTML = "<p>Nenhum grupo encontrado.</p>";
+                    return;
+                }
+
+                groups.forEach(group => {
+                    const groupCard = document.createElement("div");
+                    groupCard.className = "column";
+                    groupCard.innerHTML = `
+                        <a href="#">
+                            <div class="card">
+                                <h3>${group.nome}</h3>
+                                ${group.membros.map(member => `<p>${member}</p>`).join("")}
+                            </div>
+                        </a>
+                    `;
+                    container.appendChild(groupCard);
+                });
+            } catch (error) {
+                console.error("Erro ao carregar grupos:", error);
+                document.querySelector(".row").innerHTML = "<p>Erro ao carregar grupos.</p>";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadGroups);
+    </script>
 </body>
 
 </html>

@@ -1,23 +1,24 @@
 {
   "name": "trabalhocn",
   "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+  "description": "Aplicação de gestão de orçamento e despesas pessoais ou em grupo, com autenticação de utilizadores e integração com o CosmosDB da Azure.",
+  "keywords": [],
+  "homepage": "https://github.com/nrsytox/TrabalhoCN#readme",
+  "bugs": {
+    "url": "https://github.com/nrsytox/TrabalhoCN/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nrsytox/TrabalhoCN.git"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/nrsytox/TrabalhoCN/issues"
+  "author": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
-  "homepage": "https://github.com/nrsytox/TrabalhoCN#readme",
-  "description": "",
   "dependencies": {
     "@azure/cosmos": "^4.0.0",
     "axios": "^1.9.0",
@@ -29,5 +30,6 @@
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^4.0.2",
     "uuid": "^9.0.0"
-  }
+  },
+  "devDependencies": {}
 }
