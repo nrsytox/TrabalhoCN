@@ -7,7 +7,6 @@ const session = require("express-session");
 const { CosmosClient } = require("@azure/cosmos");
 const path = require("path");
 const axios = require('axios');
-const cron = require("node-cron");
 
 const app = express();
 
@@ -42,6 +41,40 @@ function authMiddleware(req, res, next) {
   else res.status(401).json({ error: "Não autenticado" });
 }
 
+// Middleware para atualizar orçamento
+app.use(async (req, res, next) => {
+    if (!req.session.user) return next(); // Alterado para verificar session
+    
+    try {
+        const userId = req.session.user.id;
+        const { resource: user } = await usersContainer.item(userId, userId).read(); // Usar usersContainer
+
+        if (!user) return next();
+
+        const hoje = new Date();
+        const ultimoReset = new Date(user.ultimo_reset);
+        const primeiroDiaMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+        // Reset se:
+        // 1. O último reset foi no mês passado E
+        // 2. Já estamos no dia 1 ou depois
+        if (ultimoReset < primeiroDiaMesAtual && hoje >= primeiroDiaMesAtual) {
+            user.orcamento_restante = user.orcamento_mensal;
+            user.ultimo_reset = hoje.toISOString();
+            await usersContainer.item(userId, userId).replace(user);
+            
+            // Atualiza a sessão
+            req.session.user.orcamento_restante = user.orcamento_restante;
+        }
+
+        req.user = user;
+        next();
+    } catch (err) {
+        console.error("Erro no middleware de reset:", err);
+        next();
+    }
+});
+
 // ======================= ROTAS ========================== //
 
 // Rotas estáticas
@@ -74,7 +107,8 @@ app.post("/auth/register", async (req, res) => {
       orcamento_mensal: Number(orcamento_mensal),
       orcamento_restante: Number(orcamento_mensal),
       grupos: [],
-      notificacoes: []
+      notificacoes: [],
+      ultimo_reset: new Date().toISOString()
     };
 
     await usersContainer.items.create(newUser);
@@ -128,7 +162,6 @@ app.get("/api/grupos", authMiddleware, async (req, res) => {
     res.json(resources);
 });
 
-// API para adicionar despesa (atualizada)
 app.post("/api/despesas", authMiddleware, async (req, res) => {
   try {
     const { descricao, valor, categoria, grupo } = req.body;
@@ -137,19 +170,22 @@ app.post("/api/despesas", authMiddleware, async (req, res) => {
     // 1. Verificar se é despesa de grupo
     let participantesIds = [userId];
     let valorPorParticipante = Number(valor);
+    let numMembros = 1;
 
     if (grupo) {
       const { resource: grupoDoc } = await gruposContainer.item(grupo, grupo).read();
       if (!grupoDoc) throw new Error("Grupo não encontrado");
       participantesIds = grupoDoc.membros;
-      valorPorParticipante = Number(valor) / participantesIds.length;
+      numMembros = participantesIds.length;
+      valorPorParticipante = Number(valor) / numMembros;
     }
 
     // 2. Chamar HTTP Trigger para verificação
     const { data: verificacao } = await axios.post(process.env.HTTP_TRIGGER_URL, {
-      valorGasto: valorPorParticipante,
+      valorTotal: Number(valor),
       orcamentoMensal: req.session.user.orcamento_mensal,
-      orcamentoRestante: req.session.user.orcamento_restante
+      orcamentoRestante: req.session.user.orcamento_restante,
+      numMembros: numMembros
     });
 
     // 3. Atualizar usuários e registrar transação
@@ -157,10 +193,12 @@ app.post("/api/despesas", authMiddleware, async (req, res) => {
       const { resource: user } = await usersContainer.item(participanteId, participanteId).read();
       user.orcamento_restante -= valorPorParticipante;
       
-      if (verificacao.alerta) {
+      // Verificar se é o usuário atual e se há alerta
+      if (participanteId === userId && verificacao.alerta) {
         user.notificacoes = [...(user.notificacoes || []), {
           id: Date.now().toString(),
-          mensagem: verificacao.alerta,
+          tipo: verificacao.alerta.tipo,
+          mensagem: verificacao.alerta.mensagem,
           data: new Date().toISOString(),
           lida: false
         }];
@@ -193,6 +231,7 @@ app.post("/api/despesas", authMiddleware, async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Erro ao adicionar despesa:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -242,26 +281,6 @@ app.get("/logout", (req, res) => {
     if (err) console.error("Erro ao terminar sessão:", err);
     res.json({ success: true });
   });
-});
-
-// ======================= CRON JOB ======================= //
-
-// Resetar orçamento de cada utilizador no dia 1 de cada mês
-cron.schedule("0 0 0 1 * *", async () => {
-  console.log("⏰ Cron Job: Atualizar orçamentos mensais");
-
-  try {
-    const { resources: users } = await container.items.query("SELECT * FROM c").fetchAll();
-
-    for (const user of users) {
-      user.orcamento_restante = user.orcamento_mensal;
-      await container.item(user.id, user.id).replace(user);
-    }
-
-    console.log("✅ Orçamentos mensais atualizados");
-  } catch (error) {
-    console.error("Erro no cron job de atualização de orçamentos:", error.message);
-  }
 });
 
 // Servidor
