@@ -23,15 +23,11 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: npm install
-        run: npm install
-
-# Comente ou remova esta parte se não houver build
-# - name: Build (opcional)
-#   run: echo "Sem etapa de build"
-
-      - name: Skipping test (temporário)
-        run: echo "Skipping test step (temporariamente desativado)"
+      - name: npm install, build, and test
+        run: |
+          npm install
+          npm run build --if-present
+          npm run test --if-present
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
@@ -64,9 +60,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_31E2BB615A164521AD20BAF3F8791104 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FC428C29480E442AAF93DCBF11A42AE1 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2DD9A8F0DFBD44749FFADBAE803654CF }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_3592BFAE650D4331B7341EA2F4A7F5A2 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4D0DBD253CD34982A583EF463AAB428A }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_23B56DC4115A4547B3BC67605D64966F }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
