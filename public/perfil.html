@@ -37,6 +37,10 @@
         <label for="email"><b>Email : </b></label><span id="email"></span></p>
         <label for="orcamento_mensal"><b>Orçamento Mensal : </b></label><span id="orcamento_mensal"></span>€</p>
         <label for="orcamento_restante"><b>Orçamento Restante : </b></label><span id="orcamento_restante"></span>€</p>
+        <br>
+        <a href="#" id="exportBtn" class="normalbtn">
+            <span>Exportar Despesas/Dados</span>
+        </a>
     </div>
 
 
@@ -60,11 +64,25 @@
             });
 
         document.addEventListener("DOMContentLoaded", () => {
+            // Exportar despesas
+            const exportBtn = document.getElementById("exportBtn");
+            if (exportBtn) {
+                exportBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                // Redireciona para a rota que proxy do Docker
+                window.location.href = "/exportar";
+                });
+            }
+
+            // Logout
             const logoutBtn = document.getElementById("logoutBtn");
             if (logoutBtn) {
-                logoutBtn.addEventListener("click", () => {
-                    fetch("/logout").then(() => (window.location.href = "/"));
+            logoutBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                fetch("/logout").then(() => {
+                window.location.href = "/";
                 });
+            });
             }
         });
     </script>

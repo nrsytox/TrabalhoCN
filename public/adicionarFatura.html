@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adicionar Fatura - ExpenseMate</title>
+  <link rel="icon" href="logo1.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <div class="btn-container">
+      <a href="adicionarDespesa.html" class="add-btn">Adicionar Despesa</a>
+    </div>
+    <ul class="nav-container">
+      <li><a href="adicionarFatura.html" class="normalbtn">Adicionar Fatura</a></li>
+      <li><a href="grupos.html" class="normalbtn">Grupos</a></li>
+      <li class="logo"><a href="dashboard.html"><img src="logo.png" alt="Logo"></a></li>
+      <li><a href="perfil.html" class="normalbtn">Perfil</a></li>
+      <li><a href="#" id="logoutBtn" class="normalbtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="container info">
+    <h2>Minhas Faturas</h2>
+
+    <form id="uploadForm" class="upload-form">
+      <input type="file" id="fileInput" accept="image/*" required />
+      <label for="fileInput" id="fileLabel" class="add-btn">Escolher Fatura</label>
+      <button type="submit" class="add-btn">Carregar Fatura</button>
+    </form>
+
+    <div id="faturasList" class="faturas-grid"></div>
+  </div>
+
+  <footer>
+    <p>Beatriz Marques | Filipe Serôdio | Tomás Ribeiro<br>© 2025 ExpenseMate. All rights reserved.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const fileInput = document.getElementById('fileInput');
+      const fileLabel = document.getElementById('fileLabel');
+      const uploadForm = document.getElementById('uploadForm');
+
+      // Feedback visual ao escolher ficheiro
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+          let name = fileInput.files[0].name;
+          if (name.length > 20) name = name.slice(0, 17) + '…';
+          fileLabel.textContent = name;
+          fileLabel.classList.add('selected');
+        } else {
+          fileLabel.textContent = 'Escolher Fatura';
+          fileLabel.classList.remove('selected');
+        }
+      });
+
+      // Função de listagem
+      async function listarFaturas() {
+        const res = await fetch('/api/faturas', { credentials: 'include' });
+        if (!res.ok) return console.error('Erro a listar');
+        const { files } = await res.json();
+        const grid = document.getElementById('faturasList');
+        grid.innerHTML = '';
+        files.forEach(f => {
+          const item = document.createElement('div');
+          item.className = 'fatura-item';
+          item.innerHTML = `
+            <img src="${f.url}" alt="${f.name}" />
+            <div class="btns">
+              <button type="button" class="delete-btn" data-name="${encodeURIComponent(f.name)}">Eliminar</button>
+              <a href="${f.url}" download class="download-btn">Descarregar</a>
+            </div>`;
+          grid.appendChild(item);
+        });
+
+        // Attach delete handlers
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const name = btn.dataset.name;
+            const r = await fetch(`/api/faturas/${name}`, {
+              method: 'DELETE',
+              credentials: 'include'
+            });
+            if (r.ok) listarFaturas();
+          });
+        });
+      }
+
+      // Upload handler
+      uploadForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!fileInput.files.length) return;
+        const fd = new FormData();
+        fd.append('file', fileInput.files[0]);
+        const r = await fetch('/api/faturas', {
+          method: 'POST',
+          body: fd,
+          credentials: 'include'
+        });
+        if (r.ok) {
+          fileInput.value = '';
+          fileLabel.textContent = 'Escolher Fatura';
+          fileLabel.classList.remove('selected');
+          listarFaturas();
+        }
+      });
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', e => {
+        e.preventDefault();
+        fetch('/logout', { credentials: 'include' }).then(() => location.href = '/');
+      });
+
+      listarFaturas();
+    });
+  </script>
+</body>
+</html>

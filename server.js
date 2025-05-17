@@ -7,6 +7,8 @@ const session = require("express-session");
 const { CosmosClient } = require("@azure/cosmos");
 const path = require("path");
 const axios = require("axios");
+const stream = require('stream');
+const util = require('util');
 
 const app = express();
 
@@ -355,6 +357,101 @@ app.get("/logout", (req, res) => {
     res.json({ success: true });
   });
 });
+
+// Rota para fazer download/exportação
+app.get("/exportar", authMiddleware, async (req, res) => {
+  try {
+    // Base da URL do Docker + possível user_id
+    const baseUrl = process.env.DOCKER;             // ex: "http://localhost:5000/export?"
+    const userId  = req.session.user.id;            // id do utilizador autenticado
+    const exportUrl = `${baseUrl}user_id=${userId}`; 
+
+    // Pedido GET ao serviço Docker, em streaming
+    const response = await axios.get(exportUrl, {
+      responseType: "stream",
+    });
+
+    // Propaga os headers de download (nome do ficheiro, tipo)
+    res.setHeader(
+      "Content-Disposition",
+      response.headers["content-disposition"]
+    );
+    res.setHeader("Content-Type", response.headers["content-type"]);
+
+    // Transfere o stream diretamente para o cliente
+    await util.promisify(stream.pipeline)(response.data, res);
+  } catch (err) {
+    console.error("Erro ao exportar:", err);
+    res.status(500).send("Falha na exportação.");
+  }
+});
+
+const { BlobServiceClient } = require("@azure/storage-blob");
+const multer = require("multer");
+const upload = multer(); // para lidar com multipart/form-data
+
+const AZURE_SAS_URL = process.env.AZURE_BLOB_SAS_URL;
+const blobServiceClient = new BlobServiceClient(AZURE_SAS_URL);
+const containerClient = blobServiceClient.getContainerClient(""); // "" pois já vem no SAS URL
+
+// Listar imagens do utilizador
+app.get("/api/faturas", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const iterator = containerClient.listBlobsFlat({ prefix: `${userId}/` });
+
+    const files = [];
+    for await (const blob of iterator) {
+      const blobUrl = `${AZURE_SAS_URL.split("?")[0]}/${blob.name}?${AZURE_SAS_URL.split("?")[1]}`;
+      files.push({ name: blob.name, url: blobUrl });
+    }
+
+    res.json({ files });
+  } catch (err) {
+    console.error("Erro ao listar faturas:", err);
+    res.status(500).send("Erro ao listar faturas");
+  }
+});
+
+// Upload de fatura
+app.post("/api/faturas", authMiddleware, upload.single("file"), async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const file = req.file;
+    const blobName = `${userId}/${Date.now()}_${file.originalname}`;
+
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    await blockBlobClient.uploadData(file.buffer);
+
+    res.status(201).json({ success: true, blobName });
+  } catch (err) {
+    console.error("Erro ao fazer upload da fatura:", err);
+    res.status(500).send("Erro ao fazer upload da fatura");
+  }
+});
+
+// Apagar fatura
+app.delete("/api/faturas/:blobName", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const blobName = req.params.blobName;
+
+    // Impede que se apague blobs fora da pasta do utilizador
+    if (!blobName.startsWith(`${userId}/`)) {
+      return res.status(403).send("Acesso negado");
+    }
+
+    const blobClient = containerClient.getBlobClient(blobName);
+    await blobClient.deleteIfExists();
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Erro ao apagar fatura:", err);
+    res.status(500).send("Erro ao apagar fatura");
+  }
+});
+
+
 
 // Servidor
 const PORT = process.env.PORT || 3000;
