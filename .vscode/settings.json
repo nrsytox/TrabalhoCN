@@ -5,5 +5,7 @@
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
     "azureFunctions.projectLanguageModel": 4,
-    "azureFunctions.preDeployTask": "npm prune (functions)"
+    "azureFunctions.preDeployTask": "npm prune (functions)",
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/39297beb-8261-4234-8d5d-bcb4ae138f47/resourceGroups/aula/providers/Microsoft.Web/sites/app-beatriz-marques",
+    "appService.deploySubpath": "."
 }
