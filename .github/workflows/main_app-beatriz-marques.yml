@@ -61,4 +61,4 @@ jobs:
           app-name: 'app-beatriz-marques'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_081E443AAADF491D8012388E14DCF242 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1AC5A97B53E14DB7808D3300B4DA1EEB }}
