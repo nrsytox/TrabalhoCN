@@ -44,8 +44,14 @@
 
         async function loadGroups() {
             try {
-                const response = await fetch("/api/grupos");
-                const groups = await response.json();
+                const [groupsRes, usersRes] = await Promise.all([
+                    fetch("/api/grupos"),
+                    fetch("/api/users?q=") // busca todos os users
+                ]);
+                const groups = await groupsRes.json();
+                const users = await usersRes.json();
+                const userMap = {};
+                users.forEach(u => userMap[u.id] = u.nome);
 
                 const container = document.querySelector(".row");
                 container.innerHTML = "";
@@ -59,13 +65,13 @@
                     const groupCard = document.createElement("div");
                     groupCard.className = "column";
                     groupCard.innerHTML = `
-                        <a href="#">
-                            <div class="card">
-                                <h3>${group.nome}</h3>
-                                ${group.membros.map(member => `<p>${member}</p>`).join("")}
-                            </div>
-                        </a>
-                    `;
+                <a href="#">
+                    <div class="card">
+                        <h3>${group.nome}</h3>
+                        ${group.membros.map(id => `<p>${userMap[id] || id}</p>`).join("")}
+                    </div>
+                </a>
+            `;
                     container.appendChild(groupCard);
                 });
             } catch (error) {

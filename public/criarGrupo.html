@@ -35,11 +35,12 @@
             <label for="Nome">Nome do Grupo</label><br>
             <input type="text" id="nome_grupo" name="nome_grupo" required><br><br>
 
-            <label for="valor">Pessoas</label><br>
+            <label for="valor">ID do Utilizador</label><br>
             <div class="clearfix">
-                <input type="text" id="nomeInput" placeholder="Adicione uma pessoa">
-                <a onclick="adicionarNome()" class="normalbtn">Adicionar</a>
+                <input type="text" id="idInput" placeholder="Adicione o ID do utilizador">
+                <a onclick="adicionarId()" class="normalbtn">Adicionar</a>
             </div>
+            <ul id="listaIds"></ul>
 
             <ul id="listaNomes"></ul>
 
@@ -51,19 +52,99 @@
     </div>
 
     <script>
-        function adicionarNome() {
-            const input = document.getElementById("nomeInput");
-            const nome = input.value.trim();
+        async function adicionarId() {
+            const input = document.getElementById("idInput");
+            const id = input.value.trim();
+            if (!id) return;
 
-            if (nome !== "") {
-                const li = document.createElement("li");
-                li.textContent = nome;
-                li.style.listStyleType = "none";
-                document.getElementById("listaNomes").appendChild(li);
-                input.value = "";
-                input.focus();
+            // Verifica se o ID existe no backend
+            const res = await fetch(`/api/users?q=${encodeURIComponent(id)}`);
+            const users = await res.json();
+
+            // Só aceita se houver correspondência exata de ID
+            const user = users.find(u => u.id === id);
+            if (!user) {
+                alert("Utilizador com esse ID não existe!");
+                return;
             }
+
+            // Previne duplicados
+            const listaIds = document.getElementById("listaIds");
+            if (Array.from(listaIds.children).some(li => li.dataset.id === user.id)) {
+                alert("Utilizador já adicionado.");
+                return;
+            }
+
+            const li = document.createElement("li");
+            li.textContent = user.nome + " (" + user.id + ")";
+            li.dataset.id = user.id;
+            li.style.listStyleType = "none";
+            listaIds.appendChild(li);
+            input.value = "";
+            input.focus();
         }
+
+        document.querySelector('.normalbtn[onclick="adicionarId()"]').onclick = adicionarId;
+
+        document.getElementById("formDespesa").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const groupName = document.getElementById("nome_grupo").value.trim();
+            const members = Array.from(document.getElementById("listaIds").children).map(li => li.dataset.id);
+
+            if (!groupName || members.length === 0) {
+                alert("Por favor, insira um nome para o grupo e adicione pelo menos um ID.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/grupos", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nome: groupName, membros: members })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao criar o grupo.");
+                }
+
+                alert("Grupo criado com sucesso!");
+                window.location.href = "grupos.html";
+            } catch (error) {
+                console.error("Erro ao criar grupo:", error);
+                alert("Erro ao criar o grupo. Tente novamente.");
+            }
+        });
+
+        document.querySelector('.normalbtn[onclick="adicionarNome()"]').onclick = adicionarNome;
+
+        document.getElementById("formDespesa").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const groupName = document.getElementById("nome_grupo").value.trim();
+            const members = Array.from(document.getElementById("listaNomes").children).map(li => li.dataset.id);
+
+            if (!groupName || members.length === 0) {
+                alert("Por favor, insira um nome para o grupo e adicione pelo menos uma pessoa.");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/grupos", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nome: groupName, membros: members })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erro ao criar o grupo.");
+                }
+
+                alert("Grupo criado com sucesso!");
+                window.location.href = "grupos.html";
+            } catch (error) {
+                console.error("Erro ao criar grupo:", error);
+                alert("Erro ao criar o grupo. Tente novamente.");
+            }
+        });
 
         document.getElementById("formDespesa").addEventListener("submit", async function (e) {
             e.preventDefault();

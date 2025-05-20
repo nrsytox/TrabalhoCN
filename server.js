@@ -7,8 +7,8 @@ const session = require("express-session");
 const { CosmosClient } = require("@azure/cosmos");
 const path = require("path");
 const axios = require("axios");
-const stream = require('stream');
-const util = require('util');
+const stream = require("stream");
+const util = require("util");
 
 const app = express();
 
@@ -180,17 +180,6 @@ app.get("/api/categorias", async (req, res) => {
 });
 
 // API para grupos
-app.get("/api/grupos", authMiddleware, async (req, res) => {
-  const { resources } = await gruposContainer.items
-    .query({
-      query: "SELECT * FROM c WHERE ARRAY_CONTAINS(c.membros, @id)",
-      parameters: [{ name: "@id", value: req.session.user.id }],
-    })
-    .fetchAll();
-  res.json(resources);
-});
-
-// API para criar grupos
 app.post("/api/grupos", authMiddleware, async (req, res) => {
   try {
     const { nome, membros } = req.body;
@@ -210,6 +199,23 @@ app.post("/api/grupos", authMiddleware, async (req, res) => {
     };
 
     await gruposContainer.items.create(newGroup);
+
+    // Adicionar o grupo ao array 'grupos' de cada utilizador
+    await Promise.all(
+      membros.map(async (userId) => {
+        const { resource: user } = await usersContainer
+          .item(userId, userId)
+          .read();
+        if (user) {
+          user.grupos = user.grupos || [];
+          if (!user.grupos.includes(newGroup.id)) {
+            user.grupos.push(newGroup.id);
+            await usersContainer.item(userId, userId).replace(user);
+          }
+        }
+      })
+    );
+
     res.status(201).json({ success: true, group: newGroup });
   } catch (error) {
     console.error("Erro ao criar grupo:", error);
@@ -247,6 +253,18 @@ app.post("/api/despesas", authMiddleware, async (req, res) => {
         numMembros: numMembros,
       }
     );
+
+    app.get("/api/users", authMiddleware, async (req, res) => {
+      const q = req.query.q || "";
+      if (!q) return res.json([]);
+      const { resources } = await usersContainer.items
+        .query({
+          query: "SELECT c.id, c.nome, c.email FROM c WHERE c.id = @q",
+          parameters: [{ name: "@q", value: q }],
+        })
+        .fetchAll();
+      res.json(resources);
+    });
 
     // 3. Atualizar usuários e registrar transação
     await Promise.all(
@@ -362,9 +380,9 @@ app.get("/logout", (req, res) => {
 app.get("/exportar", authMiddleware, async (req, res) => {
   try {
     // Base da URL do Docker + possível user_id
-    const baseUrl = process.env.DOCKER;             // ex: "http://localhost:5000/export?"
-    const userId  = req.session.user.id;            // id do utilizador autenticado
-    const exportUrl = `${baseUrl}user_id=${userId}`; 
+    const baseUrl = process.env.DOCKER; // ex: "http://localhost:5000/export?"
+    const userId = req.session.user.id; // id do utilizador autenticado
+    const exportUrl = `${baseUrl}user_id=${userId}`;
 
     // Pedido GET ao serviço Docker, em streaming
     const response = await axios.get(exportUrl, {
@@ -402,7 +420,9 @@ app.get("/api/faturas", authMiddleware, async (req, res) => {
 
     const files = [];
     for await (const blob of iterator) {
-      const blobUrl = `${AZURE_SAS_URL.split("?")[0]}/${blob.name}?${AZURE_SAS_URL.split("?")[1]}`;
+      const blobUrl = `${AZURE_SAS_URL.split("?")[0]}/${blob.name}?${
+        AZURE_SAS_URL.split("?")[1]
+      }`;
       files.push({ name: blob.name, url: blobUrl });
     }
 
@@ -414,21 +434,26 @@ app.get("/api/faturas", authMiddleware, async (req, res) => {
 });
 
 // Upload de fatura
-app.post("/api/faturas", authMiddleware, upload.single("file"), async (req, res) => {
-  try {
-    const userId = req.session.user.id;
-    const file = req.file;
-    const blobName = `${userId}/${Date.now()}_${file.originalname}`;
+app.post(
+  "/api/faturas",
+  authMiddleware,
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const userId = req.session.user.id;
+      const file = req.file;
+      const blobName = `${userId}/${Date.now()}_${file.originalname}`;
 
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-    await blockBlobClient.uploadData(file.buffer);
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      await blockBlobClient.uploadData(file.buffer);
 
-    res.status(201).json({ success: true, blobName });
-  } catch (err) {
-    console.error("Erro ao fazer upload da fatura:", err);
-    res.status(500).send("Erro ao fazer upload da fatura");
+      res.status(201).json({ success: true, blobName });
+    } catch (err) {
+      console.error("Erro ao fazer upload da fatura:", err);
+      res.status(500).send("Erro ao fazer upload da fatura");
+    }
   }
-});
+);
 
 // Apagar fatura
 app.delete("/api/faturas/:blobName", authMiddleware, async (req, res) => {
