@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,17 +8,23 @@
   <link rel="icon" href="logo1.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <nav>
-    <div class="btn-container">
-      <a href="adicionarDespesa.html" class="add-btn">Adicionar Despesa</a>
-    </div>
-    <ul class="nav-container">
-      <li><a href="adicionarFatura.html" class="normalbtn">Adicionar Fatura</a></li>
-      <li><a href="grupos.html" class="normalbtn">Grupos</a></li>
-      <li class="logo"><a href="dashboard.html"><img src="logo.png" alt="Logo"></a></li>
-      <li><a href="perfil.html" class="normalbtn">Perfil</a></li>
-      <li><a href="#" id="logoutBtn" class="normalbtn">Logout</a></li>
+    <ul>
+      <div class="nav-container">
+        <div class="nav-left">
+          <li><a href="adicionarFatura.html" class="normalbtn"><span>Faturas</span></a></li>
+          <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
+        </div>
+        <div class="nav-center">
+          <li><a href="dashboard.html"><img src="logo.png"></a></li>
+        </div>
+        <div class="nav-right">
+          <li><a href="perfil.html" class="normalbtn"><span>Perfil</span></a></li>
+          <li><a href="#" id="logoutBtn" class="normalbtn"><span>Logout</span></a></li>
+        </div>
+      </div>
     </ul>
   </nav>
 
@@ -117,4 +124,5 @@
     });
   </script>
 </body>
+
 </html>

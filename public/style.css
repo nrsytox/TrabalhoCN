@@ -64,12 +64,13 @@ input[type="number"] {
 
 input[type="text"]:focus,
 input[type="password"]:focus,
-input[type="number"]:focus{
+input[type="number"]:focus {
   background-color: #ddd;
   outline: none;
 }
 
-#categorias, #grupos{
+#categorias,
+#grupos {
   width: 100%;
   padding: 15px;
   margin: 5px 0 22px 0;
@@ -96,6 +97,11 @@ button:hover {
   border: none;
   cursor: pointer;
   opacity: 0.9;
+}
+
+.ver-mais-btn {
+  color: #000000;
+  cursor: pointer;
 }
 
 .firstbtn {
@@ -195,9 +201,9 @@ button:hover {
 nav {
   font-size: medium;
   text-align: center;
-  display: flex; 
-  flex-direction: column; 
-  justify-content: center; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   height: 100%;
 }
@@ -216,7 +222,7 @@ nav ul {
 nav li {
   text-align: center;
   display: flex;
-  align-items: center; 
+  align-items: center;
 }
 
 nav a {
@@ -243,7 +249,6 @@ nav a img {
   width: 100%;
   max-width: 800px; /* or your preferred width */
 }
-
 
 .nav-left,
 .nav-center,
@@ -286,42 +291,40 @@ nav a img {
 }
 
 .progress-bar-container {
-    width: 100%;
-    height: 20px;
-    background-color: #e0e0e0;
-    border-radius: 10px;
-    margin: 10px 0;
-    overflow: hidden;
+  width: 100%;
+  height: 20px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  margin: 10px 0;
+  overflow: hidden;
 }
 
 .progress-bar {
-    height: 100%;
-    background-color: #4caf50;
-    transition: width 0.3s ease;
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.3s ease;
 }
 
 .transaction-category {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 12px;
-    background-color: rgba(0,0,0,0.05);
-    font-style: normal;
-    font-size: 0.9em;
-    margin-top: 5px;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.05);
+  font-style: normal;
+  font-size: 0.9em;
+  margin-top: 5px;
 }
 .transaction-group-name {
-    color: #2196F3;
-    font-size: 0.9em;
-    margin: 3px 0;
-    font-weight: 500;
+  color: #2196f3;
+  font-size: 0.9em;
+  margin: 3px 0;
+  font-weight: 500;
 }
 
 .transaction-group {
-    border-left: 4px solid #2196F3;
-    background-color: rgba(33, 150, 243, 0.05);
+  border-left: 4px solid #2196f3;
+  background-color: rgba(33, 150, 243, 0.05);
 }
-
-
 
 /* ===========================
    Upload form
@@ -386,13 +389,13 @@ nav a img {
 /* 1. Centralizar todo o conteúdo principal */
 .container.info {
   max-width: 800px;
-  margin: 0 auto;        /* centra horizontalmente */
-  text-align: center;     /* centra texto e inline-blocks */
+  margin: 0 auto; /* centra horizontalmente */
+  text-align: center; /* centra texto e inline-blocks */
 }
 
 /* 2. Flex form também centrado */
 .upload-form {
-  display: inline-flex;   /* inline-flex para se centrar via text-align:center no pai */
+  display: inline-flex; /* inline-flex para se centrar via text-align:center no pai */
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
@@ -400,7 +403,7 @@ nav a img {
 
 /* 3. Estado “selected” na label */
 .custom-file-btn.selected {
-  background: #2ecc71;    /* muda de cor para indicar seleção */
+  background: #2ecc71; /* muda de cor para indicar seleção */
   border: 2px solid #27ae60;
 }
 
@@ -409,8 +412,8 @@ nav a img {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
-  margin: 0 auto;         /* centra o grid no container */
-  justify-items: center;  /* centra cada item dentro da célula */
+  margin: 0 auto; /* centra o grid no container */
+  justify-items: center; /* centra cada item dentro da célula */
 }
 
 /* 5. Cada item */
@@ -443,4 +446,6 @@ nav a img {
 .download-btn:hover {
   background: #219150;
 }
-.delete-btn:hover { background: #c0392b; }
+.delete-btn:hover {
+  background: #c0392b;
+}

@@ -11,13 +11,10 @@
 
 <body>
     <nav>
-        <div class="btn-container">
-            <a href="adicionarDespesa.html" class="add-btn">Adicionar Despesa</a>
-        </div>
         <ul>
             <div class="nav-container">
                 <div class="nav-left">
-                    <li><a href="adicionarFatura.html" class="normalbtn"><span>Adicionar Fatura</span></a></li>
+                    <li><a href="adicionarFatura.html" class="normalbtn"><span>Faturas</span></a></li>
                     <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
                 </div>
                 <div class="nav-center">
@@ -30,10 +27,11 @@
             </div>
         </ul>
     </nav>
-
+    <hr>
     <div class="container info">
         <h2>Perfil do Utilizador</h2>
-        <label for="text"><b>Código pessoal #</b></label><span id="cod"></span></p>
+        <label for="text"><b>Código pessoal </b></label><span id="cod"></span></p>
+        <button id="copiarIdBtn" class="normalbtn" style="margin-left:8px;">Copiar</button>
         <hr>
         <label for="text"><b>Nome : </b></label><span id="nome"></span></p>
         <label for="email"><b>Email : </b></label><span id="email"></span></p>
@@ -71,21 +69,33 @@
             const exportBtn = document.getElementById("exportBtn");
             if (exportBtn) {
                 exportBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                // Redireciona para a rota que proxy do Docker
-                window.location.href = "/exportar";
+                    e.preventDefault();
+                    // Redireciona para a rota que proxy do Docker
+                    window.location.href = "/exportar";
+                });
+            }
+
+            // Copiar ID para a área de transferência
+            const copiarBtn = document.getElementById("copiarIdBtn");
+            if (copiarBtn) {
+                copiarBtn.addEventListener("click", () => {
+                    const id = document.getElementById("cod").textContent;
+                    navigator.clipboard.writeText(id).then(() => {
+                        copiarBtn.textContent = "Copiado!";
+                        setTimeout(() => copiarBtn.textContent = "Copiar", 1500);
+                    });
                 });
             }
 
             // Logout
             const logoutBtn = document.getElementById("logoutBtn");
             if (logoutBtn) {
-            logoutBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                fetch("/logout").then(() => {
-                window.location.href = "/";
+                logoutBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    fetch("/logout").then(() => {
+                        window.location.href = "/";
+                    });
                 });
-            });
             }
         });
     </script>

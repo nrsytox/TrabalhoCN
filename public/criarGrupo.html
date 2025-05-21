@@ -9,13 +9,10 @@
 
 <body>
     <nav>
-        <div class="btn-container">
-            <a href="adicionarDespesa.html" class="add-btn">Adicionar Despesa</a>
-        </div>
         <ul>
             <div class="nav-container">
                 <div class="nav-left">
-                    <li><a href="adicionarFatura.html" class="normalbtn"><span>Adicionar Fatura</span></a></li>
+                    <li><a href="adicionarFatura.html" class="normalbtn"><span>Faturas</span></a></li>
                     <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
                 </div>
                 <div class="nav-center">
@@ -96,35 +93,21 @@
                 return;
             }
 
+            // Buscar o próprio ID do utilizador autenticado
+            let myId;
             try {
-                const response = await fetch("/api/grupos", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nome: groupName, membros: members })
-                });
-
-                if (!response.ok) {
-                    throw new Error("Erro ao criar o grupo.");
-                }
-
-                alert("Grupo criado com sucesso!");
-                window.location.href = "grupos.html";
-            } catch (error) {
-                console.error("Erro ao criar grupo:", error);
-                alert("Erro ao criar o grupo. Tente novamente.");
-            }
-        });
-
-        document.querySelector('.normalbtn[onclick="adicionarNome()"]').onclick = adicionarNome;
-
-        document.getElementById("formDespesa").addEventListener("submit", async function (e) {
-            e.preventDefault();
-            const groupName = document.getElementById("nome_grupo").value.trim();
-            const members = Array.from(document.getElementById("listaNomes").children).map(li => li.dataset.id);
-
-            if (!groupName || members.length === 0) {
-                alert("Por favor, insira um nome para o grupo e adicione pelo menos uma pessoa.");
+                const perfilRes = await fetch("/api/perfil");
+                if (!perfilRes.ok) throw new Error("Não foi possível obter o seu ID.");
+                const perfil = await perfilRes.json();
+                myId = perfil.id;
+            } catch (err) {
+                alert("Erro ao obter o seu ID. Faça login novamente.");
                 return;
+            }
+
+            // Garante que o próprio utilizador está incluído
+            if (!members.includes(myId)) {
+                members.push(myId);
             }
 
             try {
@@ -146,34 +129,11 @@
             }
         });
 
-        document.getElementById("formDespesa").addEventListener("submit", async function (e) {
+        // Logout
+        document.getElementById("logoutBtn").addEventListener("click", async (e) => {
             e.preventDefault();
-
-            const groupName = document.getElementById("nome_grupo").value.trim();
-            const members = Array.from(document.getElementById("listaNomes").children).map(li => li.textContent);
-
-            if (!groupName || members.length === 0) {
-                alert("Por favor, insira um nome para o grupo e adicione pelo menos uma pessoa.");
-                return;
-            }
-
-            try {
-                const response = await fetch("/api/grupos", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nome: groupName, membros: members })
-                });
-
-                if (!response.ok) {
-                    throw new Error("Erro ao criar o grupo.");
-                }
-
-                alert("Grupo criado com sucesso!");
-                window.location.href = "grupos.html";
-            } catch (error) {
-                console.error("Erro ao criar grupo:", error);
-                alert("Erro ao criar o grupo. Tente novamente.");
-            }
+            await fetch("/logout");
+            window.location.href = "/";
         });
 
         document.getElementById('back-link').href = document.referrer || '/';

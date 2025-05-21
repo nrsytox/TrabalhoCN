@@ -85,6 +85,26 @@ app.use(async (req, res, next) => {
 
 // ======================= ROTAS ========================== //
 
+// ROTA GLOBAL PARA USERS
+app.get("/api/users", authMiddleware, async (req, res) => {
+  const q = req.query.q || "";
+  if (!q) {
+    // Se não houver query, devolve todos os users (apenas id e nome)
+    const { resources } = await usersContainer.items
+      .query("SELECT c.id, c.nome FROM c")
+      .fetchAll();
+    return res.json(resources);
+  }
+  // Se houver query, devolve o user correspondente
+  const { resources } = await usersContainer.items
+    .query({
+      query: "SELECT c.id, c.nome, c.email FROM c WHERE c.id = @q",
+      parameters: [{ name: "@q", value: q }],
+    })
+    .fetchAll();
+  res.json(resources);
+});
+
 // Rotas estáticas
 app.get("/", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "index.html"))
@@ -175,6 +195,16 @@ app.post("/auth/login", async (req, res) => {
 app.get("/api/categorias", async (req, res) => {
   const { resources } = await categoriasContainer.items
     .query("SELECT * FROM c")
+    .fetchAll();
+  res.json(resources);
+});
+
+app.get("/api/grupos", authMiddleware, async (req, res) => {
+  const { resources } = await gruposContainer.items
+    .query({
+      query: "SELECT * FROM c WHERE ARRAY_CONTAINS(c.membros, @id)",
+      parameters: [{ name: "@id", value: req.session.user.id }],
+    })
     .fetchAll();
   res.json(resources);
 });

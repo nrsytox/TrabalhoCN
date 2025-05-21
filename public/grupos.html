@@ -15,7 +15,7 @@
             <ul>
                 <div class="nav-container">
                     <div class="nav-left">
-                        <li><a href="faturas.html" class="normalbtn"><span>Faturas</span></a></li>
+                        <li><a href="adicionarFatura.html" class="normalbtn"><span>Faturas</span></a></li>
                         <li><a href="grupos.html" class="normalbtn"><span>Grupos</span></a></li>
                     </div>
                     <div class="nav-center">
@@ -23,7 +23,7 @@
                     </div>
                     <div class="nav-right">
                         <li><a href="perfil.html" class="normalbtn"><span>Perfil</span></a></li>
-                        <li><a href=# id="logoutBtn" class="normalbtn"><span>Logout</span></a></li>
+                        <li><a href="#" id="logoutBtn" class="normalbtn"><span>Logout</span></a></li>
                     </div>
                 </div>
             </ul>
@@ -46,8 +46,12 @@
             try {
                 const [groupsRes, usersRes] = await Promise.all([
                     fetch("/api/grupos"),
-                    fetch("/api/users?q=") // busca todos os users
+                    fetch("/api/users") // busca todos os users
                 ]);
+
+                if (!groupsRes.ok) throw new Error('Erro ao carregar grupos');
+                if (!usersRes.ok) throw new Error('Erro ao carregar utilizadores');
+
                 const groups = await groupsRes.json();
                 const users = await usersRes.json();
                 const userMap = {};
@@ -56,29 +60,69 @@
                 const container = document.querySelector(".row");
                 container.innerHTML = "";
 
-                if (groups.length === 0) {
-                    container.innerHTML = "<p>Nenhum grupo encontrado.</p>";
+                if (!Array.isArray(groups) || groups.length === 0) {
+                    container.innerHTML = "<p>Não pertence a nenhum grupo.</p>";
                     return;
                 }
 
                 groups.forEach(group => {
                     const groupCard = document.createElement("div");
                     groupCard.className = "column";
+
+                    // Mostra só os 3 primeiros membros
+                    const maxToShow = 3;
+                    const membros = group.membros.map(id => userMap[id] || id);
+                    const membrosVisiveis = membros.slice(0, maxToShow);
+                    const membrosEscondidos = membros.slice(maxToShow);
+
+                    let membrosHtml = membrosVisiveis.map(nome => `<p class="membro">${nome}</p>`).join("");
+
+                    if (membrosEscondidos.length > 0) {
+                        membrosHtml += `
+            <div class="membros-extra" style="display:none;">
+                ${membrosEscondidos.map(nome => `<p class="membro">${nome}</p>`).join("")}
+            </div>
+            <a class="ver-mais-btn" style="margin-top:15px;">Ver mais</a>
+        `;
+                    }
+
                     groupCard.innerHTML = `
-                <a href="#">
-                    <div class="card">
-                        <h3>${group.nome}</h3>
-                        ${group.membros.map(id => `<p>${userMap[id] || id}</p>`).join("")}
-                    </div>
-                </a>
-            `;
+        <a href="#">
+            <div class="card">
+                <h3>${group.nome}</h3>
+                ${membrosHtml}
+            </div>
+        </a>
+    `;
                     container.appendChild(groupCard);
+
+                    // Lógica do botão "Ver mais"
+                    const btn = groupCard.querySelector('.ver-mais-btn');
+                    if (btn) {
+                        btn.addEventListener('click', function () {
+                            const extra = groupCard.querySelector('.membros-extra');
+                            if (extra.style.display === "none") {
+                                extra.style.display = "block";
+                                btn.textContent = "Ver menos";
+                            } else {
+                                extra.style.display = "none";
+                                btn.textContent = "Ver mais";
+                            }
+                        });
+                    }
                 });
             } catch (error) {
                 console.error("Erro ao carregar grupos:", error);
                 document.querySelector(".row").innerHTML = "<p>Erro ao carregar grupos.</p>";
             }
         }
+
+        // Logout
+        document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+            e.preventDefault();
+            await fetch("/logout");
+            window.location.href = "/";
+        });
 
         document.addEventListener("DOMContentLoaded", loadGroups);
     </script>
