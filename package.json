@@ -16,7 +16,7 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server",
     "test": "echo \"Skipping tests for now\""
   },
   "dependencies": {
