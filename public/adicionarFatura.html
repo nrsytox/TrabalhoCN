@@ -84,9 +84,10 @@
 
         // Attach delete handlers
         document.querySelectorAll('.delete-btn').forEach(btn => {
+          // Modificar o endpoint no fetch de delete
           btn.addEventListener('click', async () => {
             const name = btn.dataset.name;
-            const r = await fetch(`/api/faturas/${name}`, {
+            const r = await fetch(`/api/faturas/deletar/${encodeURIComponent(name)}`, { // Usar novo endpoint
               method: 'DELETE',
               credentials: 'include'
             });

@@ -512,11 +512,12 @@ app.post(
 );
 
 // Apagar fatura
-app.delete("/api/faturas/:blobName", authMiddleware, async (req, res) => {
+app.delete("/api/faturas/deletar/:blobName(*)", authMiddleware, async (req, res) => { // (*) captura tudo incluindo /
   try {
     const userId = req.session.user.id;
-    const blobName = decodeURIComponent(req.params.blobName); // <-- DECODIFICAR AQUI
+    const blobName = decodeURIComponent(req.params.blobName); // Decodificar o nome
 
+    // Verificar se o blob pertence ao utilizador
     if (!blobName.startsWith(`${userId}/`)) {
       return res.status(403).send("Acesso negado");
     }
