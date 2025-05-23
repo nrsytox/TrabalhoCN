@@ -271,6 +271,32 @@ app.post("/api/despesas", authMiddleware, async (req, res) => {
       participantesIds = grupoDoc.membros;
       numMembros = participantesIds.length;
       valorPorParticipante = Number(valor) / numMembros;
+
+      // Verificar e atualizar orçamento dos participantes que não abriram a app este mês
+      await Promise.all(
+        participantesIds.map(async (participanteId) => {
+          const { resource: user } = await usersContainer
+            .item(participanteId, participanteId)
+            .read();
+
+          if (!user) return;
+
+          const hoje = new Date();
+          const ultimoReset = new Date(user.ultimo_reset || user.ultimo_reset); // corrigindo possível typo
+          const primeiroDiaMesAtual = new Date(
+            hoje.getFullYear(),
+            hoje.getMonth(),
+            1
+          );
+
+          // Se o último reset foi antes do início do mês atual
+          if (ultimoReset < primeiroDiaMesAtual) {
+            user.orcamento_restante = user.orcamento_mensal;
+            user.ultimo_reset = hoje.toISOString();
+            await usersContainer.item(participanteId, participanteId).replace(user);
+          }
+        })
+      );
     }
 
     // 2. Chamar HTTP Trigger para verificação
