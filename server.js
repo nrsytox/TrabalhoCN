@@ -515,9 +515,8 @@ app.post(
 app.delete("/api/faturas/:blobName", authMiddleware, async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const blobName = req.params.blobName;
+    const blobName = decodeURIComponent(req.params.blobName); // <-- DECODIFICAR AQUI
 
-    // Impede que se apague blobs fora da pasta do utilizador
     if (!blobName.startsWith(`${userId}/`)) {
       return res.status(403).send("Acesso negado");
     }
